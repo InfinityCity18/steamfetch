@@ -1,4 +1,7 @@
-use crate::error;
+use crate::error::{self, error_and_quit};
+
+const PAIR_OPTIONS: &'static [&'static str] = &["-t", "-token", "--t", "--token"];
+const SINGLE_OPTIONS: &'static [&'static str] = &["-h", "-help", "--h", "--help"];
 
 pub enum ArgOption {
     Single(String),
@@ -17,7 +20,7 @@ impl ArgParser {
         let mut args = env::args();
         args.next();
 
-        let mut options: Vec<String> = Vec::new();
+        let mut options: Vec<ArgOption> = Vec::new();
         let mut arguments: Vec<String> = Vec::new();
 
         while let Some(mut argument) = args.next() {
@@ -29,14 +32,23 @@ impl ArgParser {
 
             match argument.get(0..1).unwrap() {
                 "-" => {
-                    
-                },
-                _ =>
+                    if SINGLE_OPTIONS.contains(&argument.as_str()) {
+                        options.push(ArgOption::Single(argument));
+                    } else if PAIR_OPTIONS.contains(&argument.as_str()) {
+                        let next_arg = args.next().unwrap_or_else(|| {
+                            error::error_and_quit(
+                                format!("argument not provided for \"{}\" option", argument)
+                                    .as_ref(),
+                            )
+                        });
+                        options.push(ArgOption::Pair(argument, next_arg));
+                    } else {
+                        error_and_quit(format!("no such option: {}", argument).as_ref());
+                    }
+                }
+                _ => arguments.push(argument),
             }
         }
-        ArgParser {
-            options: Vec::new(),
-            arguments: Vec::new(),
-        }
+        ArgParser { options, arguments }
     }
 }
