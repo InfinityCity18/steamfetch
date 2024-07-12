@@ -1,13 +1,15 @@
-use crate::error::{self, error_and_quit};
+use crate::error;
 
 const PAIR_OPTIONS: &'static [&'static str] = &["-t", "-token", "--t", "--token"];
 const SINGLE_OPTIONS: &'static [&'static str] = &["-h", "-help", "--h", "--help"];
 
+#[derive(Debug)]
 pub enum ArgOption {
     Single(String),
     Pair(String, String),
 }
 
+#[derive(Debug)]
 pub struct ArgParser {
     pub options: Vec<ArgOption>,
     pub arguments: Vec<String>,
@@ -43,7 +45,7 @@ impl ArgParser {
                         });
                         options.push(ArgOption::Pair(argument, next_arg));
                     } else {
-                        error_and_quit(format!("no such option: {}", argument).as_ref());
+                        error::error_and_quit(format!("no such option: {}", argument).as_ref());
                     }
                 }
                 _ => arguments.push(argument),
