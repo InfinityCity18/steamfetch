@@ -3,7 +3,6 @@
 mod arg;
 mod dns;
 mod error;
-mod net;
 
 fn main() {
     println!("Hello, world!");
