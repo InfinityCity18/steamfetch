@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+mod appinfo_json;
+mod appinfo_query;
 mod applist_json;
 mod applist_query;
 mod arg;
