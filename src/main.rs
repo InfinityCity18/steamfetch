@@ -11,4 +11,6 @@ fn main() {
     println!("Hello, world!");
     let parser = arg::ArgParser::new();
     println!("{:#?}", parser);
+    let data = appinfo_query::get_app_info(440);
+    println!("{:#?}", data);
 }
