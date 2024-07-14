@@ -1,7 +1,16 @@
 use crate::error;
 
 const PAIR_OPTIONS: &'static [&'static str] = &["-t", "-token", "--t", "--token"];
-const SINGLE_OPTIONS: &'static [&'static str] = &["-h", "-help", "--h", "--help"];
+const SINGLE_OPTIONS: &'static [&'static str] = &[
+    "-h",
+    "-help",
+    "--h",
+    "--help",
+    "-n",
+    "-noimage",
+    "--n",
+    "--noimage",
+];
 
 #[derive(Debug)]
 pub enum ArgOption {

@@ -20,6 +20,8 @@ pub struct AppInfo {
     pub is_free: bool,
     #[serde(rename = "short_description")]
     pub short_description: String,
+    #[serde(rename = "header_image")]
+    pub header_image: String,
     pub developers: Vec<String>,
     pub publishers: Vec<String>,
     pub platforms: Platforms,
