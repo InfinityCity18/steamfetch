@@ -22,7 +22,7 @@ fn main() {
     */
     let appid = find_best_app_id(
         get_applist("https://api.steampowered.com/ISteamApps/GetAppList/v1"),
-        "grand theft auto iv",
+        "final fantasy xiv",
     );
     let data = appinfo_query::get_app_info(appid).unwrap();
     //println!("{:#?}", data);

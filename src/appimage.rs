@@ -17,6 +17,7 @@ pub fn print_image(url: &str, width: u16, height: u16, x_offset: u16, y_offset: 
         absolute_offset: false,
         width: Some(width.into()),
         height: Some(height.into()),
+        restore_cursor: true,
         ..Default::default()
     };
 

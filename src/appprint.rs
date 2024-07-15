@@ -65,11 +65,65 @@ impl Module {
     pub fn build_price_reviews_mod<T: Glyph>(app: &AppInfo, width: u16, offset: u16) -> Self {
         let mut lines: Vec<Line> = Vec::new();
         let reviews: QuerySummary = get_app_reviews(app.steam_appid);
+        let (review, review_color) = get_reviews_and_color(&reviews);
+        let (price, price_color) = get_price_and_color(app);
+
+        let price_len = price.chars().count();
+        let review_len = review.chars().count();
+        let diff = width as usize - price_len - review_len - 6;
 
         lines.push(Line {
             outerleft: T::PIPE,
             outerright: T::PIPE,
             inside: String::from(" ".repeat(width.into())),
+            offset,
+        });
+
+        lines.push(Line {
+            outerleft: T::PIPE,
+            outerright: T::PIPE,
+            inside: format!(
+                " {}{}{}{}{}{}{} ",
+                price_color,
+                " ".repeat(price_len + 2),
+                RESET,
+                " ".repeat(diff),
+                review_color,
+                " ".repeat(review_len + 2),
+                RESET
+            ),
+            offset,
+        });
+
+        lines.push(Line {
+            outerleft: T::PIPE,
+            outerright: T::PIPE,
+            inside: format!(
+                " {} {} {}{}{} {} {} ",
+                price_color,
+                price,
+                RESET,
+                " ".repeat(diff),
+                review_color,
+                review,
+                RESET
+            ),
+            offset,
+        });
+
+        lines.push(Line {
+            outerleft: T::PIPE,
+            outerright: T::PIPE,
+            inside: format!(
+                " {}{}{}{}{}{}{} ",
+                price_color,
+                " ".repeat(price_len + 2),
+                RESET,
+                " ".repeat(diff),
+                review_color,
+                " ".repeat(review_len + 2),
+                RESET
+            ),
             offset,
         });
 
@@ -101,6 +155,8 @@ pub fn print_app_info<T: Glyph>(app: AppInfoRoot, width: u16, height: u16, offse
         offset,
         -(height as i16) - 1,
     );
+    let price_and_reviews = Module::build_price_reviews_mod::<FancyFont>(&app, width, offset);
+    price_and_reviews.print();
 }
 
 fn text_line(text: &str, width: u16, infill: &str) -> String {
@@ -121,10 +177,39 @@ fn text_line(text: &str, width: u16, infill: &str) -> String {
     output
 }
 
-fn get_price_and_color(app: &AppInfo) -> (&'static str) {
-    if let Some(price_overview) = app.price_overview {
+fn get_price_and_color(app: &AppInfo) -> (String, String) {
+    if let Some(price_overview) = &app.price_overview {
         if price_overview.discount_percent > 0 {
-            return (format!("{}{}", GREEN_BG, GREEN_TEXT)), format!());
+            return (
+                format!(
+                    "{} -{}%",
+                    price_overview.final_formatted, price_overview.discount_percent
+                ),
+                format!("{}{}", GREEN_BG, GREEN_TEXT),
+            );
+        } else {
+            return (
+                format!("{}", price_overview.final_formatted),
+                BLUE_BG.to_string(),
+            );
         }
+    } else {
+        return (String::from("Free"), format!("{}", BLUE_BG));
+    }
+}
+
+fn get_reviews_and_color(reviews: &QuerySummary) -> (String, String) {
+    if reviews.review_score_desc == "No user reviews" {
+        return (String::from("No reviews"), GREY_BG.to_string());
+    } else {
+        return (
+            format!(
+                "{} : {}%",
+                reviews.review_score_desc,
+                ((reviews.total_positive as f64 / reviews.total_reviews as f64) * 100.0).round()
+                    as u32
+            ),
+            BLUE_BG.to_string(),
+        );
     }
 }
