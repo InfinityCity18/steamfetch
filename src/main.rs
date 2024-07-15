@@ -5,8 +5,10 @@ mod appinfo_json;
 mod appinfo_query;
 mod applist_json;
 mod applist_query;
+mod appprint;
 mod arg;
 mod error;
+mod glyphs;
 
 fn main() {
     /*

@@ -12,13 +12,11 @@ pub fn print_image(url: &str) {
     .unwrap_or_else(|_| error::error_and_quit(format!("failed to create image").as_ref()));
 
     let (term_width, term_height) = viuer::terminal_size();
-    println!("{} {}", term_width, term_height);
-    let offset = term_width / 4;
     let width = term_width / 2;
     let height = (width * 10) / 46;
 
     let conf = viuer::Config {
-        x: offset,
+        x: 2,
         y: 1,
         absolute_offset: false,
         width: Some(width.into()),
