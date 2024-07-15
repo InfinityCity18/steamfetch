@@ -13,7 +13,7 @@ pub struct AppInfoRoot {
 pub struct AppInfo {
     pub name: String,
     #[serde(rename = "steam_appid")]
-    pub steam_appid: i64,
+    pub steam_appid: u32,
     #[serde(rename = "is_free")]
     pub is_free: bool,
     #[serde(rename = "short_description")]
@@ -25,7 +25,6 @@ pub struct AppInfo {
     #[serde(rename = "price_overview")]
     pub price_overview: Option<PriceOverview>,
     pub platforms: Platforms,
-    pub recommendations: Option<Recommendations>,
     #[serde(rename = "release_date")]
     pub release_date: ReleaseDate,
 }
@@ -36,12 +35,6 @@ pub struct Platforms {
     pub windows: bool,
     pub mac: bool,
     pub linux: bool,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Recommendations {
-    pub total: i64,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]

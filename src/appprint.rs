@@ -1,4 +1,6 @@
-use crate::appinfo_json::AppInfoRoot;
+use crate::appinfo_json::{AppInfo, AppInfoRoot};
+use crate::appreviews_json::QuerySummary;
+use crate::appreviews_query::get_app_reviews;
 use crate::glyphs::{FancyFont, Glyph};
 
 const TEXT_COLOR: &str = "\x1b[36m";
@@ -6,6 +8,8 @@ const RESET: &str = "\x1b[0m";
 const BOLD: &str = "\x1b[1m";
 const GREEN_BG: &str = "\x1b[42m";
 const GREEN_TEXT: &str = "\x1b[92m";
+const BLUE_BG: &str = "\x1b[44m";
+const GREY_BG: &str = "\x1b[100m";
 
 struct Module {
     lines: Vec<Line>,
@@ -21,6 +25,10 @@ struct Line {
 impl Module {
     pub fn print(&self) {
         self.lines.iter().for_each(|line| line.print());
+    }
+
+    pub fn escape_code(code: &str) {
+        print!("{}", code);
     }
 
     pub fn build_image_frame<T: Glyph>(
@@ -48,6 +56,20 @@ impl Module {
             outerleft: T::LEFT_T,
             outerright: T::RIGHT_T,
             inside: text_line(app_name, width, T::BAR),
+            offset,
+        });
+
+        Self { lines }
+    }
+
+    pub fn build_price_reviews_mod<T: Glyph>(app: &AppInfo, width: u16, offset: u16) -> Self {
+        let mut lines: Vec<Line> = Vec::new();
+        let reviews: QuerySummary = get_app_reviews(app.steam_appid);
+
+        lines.push(Line {
+            outerleft: T::PIPE,
+            outerright: T::PIPE,
+            inside: String::from(" ".repeat(width.into())),
             offset,
         });
 
@@ -97,4 +119,12 @@ fn text_line(text: &str, width: u16, infill: &str) -> String {
     }
 
     output
+}
+
+fn get_price_and_color(app: &AppInfo) -> (&'static str) {
+    if let Some(price_overview) = app.price_overview {
+        if price_overview.discount_percent > 0 {
+            return (format!("{}{}", GREEN_BG, GREEN_TEXT)), format!());
+        }
+    }
 }

@@ -8,6 +8,8 @@ mod appinfo_query;
 mod applist_json;
 mod applist_query;
 mod appprint;
+mod appreviews_json;
+mod appreviews_query;
 mod arg;
 mod error;
 mod glyphs;
