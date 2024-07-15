@@ -27,7 +27,7 @@ pub fn find_best_app_id(applist: AppListRoot, searched_app_name: &str) -> u32 {
             app.name
         );
         println!(
-            "wierd shit: {}",
+            "wierd thing: {}",
             &app.name[..app
                 .name
                 .char_indices()
@@ -36,7 +36,7 @@ pub fn find_best_app_id(applist: AppListRoot, searched_app_name: &str) -> u32 {
                 .unwrap_or(app.name.len())]
         );
         println!(
-            "weird shit 2: {}",
+            "weird thing 2: {}",
             &searched_app_name[..searched_app_name
                 .char_indices()
                 .map(|(i, _)| i)

@@ -27,5 +27,5 @@ fn main() {
     let width = 48;
     let height = (width * 10) / 46;
 
-    appprint::print_app_info(data, width, height);
+    appprint::print_app_info::<crate::glyphs::FancyFont>(data, width, height);
 }
