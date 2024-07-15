@@ -2,14 +2,7 @@ use crate::error;
 
 const PAIR_OPTIONS: &'static [&'static str] = &["-t", "-token", "--t", "--token"];
 const SINGLE_OPTIONS: &'static [&'static str] = &[
-    "-h",
-    "-help",
-    "--h",
-    "--help",
-    "-n",
-    "-noimage",
-    "--n",
-    "--noimage",
+    "-h", "-help", "--h", "--help", "-f", "-font", "--f", "--font",
 ];
 
 #[derive(Debug)]
@@ -22,6 +15,7 @@ pub enum ArgOption {
 pub struct ArgParser {
     pub options: Vec<ArgOption>,
     pub arguments: Vec<String>,
+    pub token: Option<String>,
 }
 
 impl ArgParser {
@@ -29,6 +23,8 @@ impl ArgParser {
         use std::env;
 
         let mut args = env::args();
+        let token = env::var("STEAM_TOKEN").ok();
+
         args.next();
 
         let mut options: Vec<ArgOption> = Vec::new();
@@ -60,6 +56,10 @@ impl ArgParser {
                 _ => arguments.push(argument),
             }
         }
-        ArgParser { options, arguments }
+        ArgParser {
+            options,
+            arguments,
+            token,
+        }
     }
 }

@@ -11,8 +11,6 @@ pub struct AppInfoRoot {
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct AppInfo {
-    #[serde(rename = "type")]
-    pub type_field: String,
     pub name: String,
     #[serde(rename = "steam_appid")]
     pub steam_appid: i64,
@@ -24,6 +22,8 @@ pub struct AppInfo {
     pub header_image: String,
     pub developers: Vec<String>,
     pub publishers: Vec<String>,
+    #[serde(rename = "price_overview")]
+    pub price_overview: Option<PriceOverview>,
     pub platforms: Platforms,
     pub recommendations: Option<Recommendations>,
     #[serde(rename = "release_date")]
@@ -50,4 +50,19 @@ pub struct ReleaseDate {
     #[serde(rename = "coming_soon")]
     pub coming_soon: bool,
     pub date: String,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PriceOverview {
+    pub currency: String,
+    pub initial: i64,
+    #[serde(rename = "final")]
+    pub final_field: i64,
+    #[serde(rename = "discount_percent")]
+    pub discount_percent: i64,
+    #[serde(rename = "initial_formatted")]
+    pub initial_formatted: String,
+    #[serde(rename = "final_formatted")]
+    pub final_formatted: String,
 }
