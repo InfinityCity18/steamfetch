@@ -20,10 +20,12 @@ fn main() {
     */
     let appid = find_best_app_id(
         get_applist("https://api.steampowered.com/ISteamApps/GetAppList/v1"),
-        "grand theft auto",
+        "prey",
     );
     let data = appinfo_query::get_app_info(appid).unwrap();
     //println!("{:#?}", data);
+    let width = 48;
+    let height = (width * 10) / 46;
 
-    appimage::print_image(&data.data.header_image, 48);
+    appprint::print_app_info(data, width, height);
 }

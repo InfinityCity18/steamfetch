@@ -19,6 +19,7 @@ pub fn find_best_app_id(applist: AppListRoot, searched_app_name: &str) -> u32 {
 
     let mut best_ref: Option<&App> = None;
     let mut best_match_value: usize = usize::MAX;
+    let mut zero_edit_shortest: usize = usize::MAX;
 
     for app in &applist {
         println!(
@@ -75,7 +76,12 @@ pub fn find_best_app_id(applist: AppListRoot, searched_app_name: &str) -> u32 {
                 searched_app_name.to_lowercase().as_ref(),
             ),
         };
-        if edit <= best_match_value {
+
+        if edit == 0 && app.name.len() <= zero_edit_shortest {
+            zero_edit_shortest = app.name.len();
+            best_ref = Some(app);
+            best_match_value = edit;
+        } else if edit < best_match_value {
             best_ref = Some(app);
             best_match_value = edit;
         }

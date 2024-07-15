@@ -1,6 +1,6 @@
 use crate::error;
 
-pub fn print_image(url: &str, width: u16) {
+pub fn print_image(url: &str, width: u16, height: u16) {
     let response = reqwest::blocking::get(url)
         .unwrap_or_else(|_| error::error_and_quit(format!("failed to fetch image").as_ref()));
 
@@ -11,10 +11,8 @@ pub fn print_image(url: &str, width: u16) {
     )
     .unwrap_or_else(|_| error::error_and_quit(format!("failed to create image").as_ref()));
 
-    let height = (width * 10) / 46;
-
     let conf = viuer::Config {
-        x: 2,
+        x: 1,
         y: 1,
         absolute_offset: false,
         width: Some(width.into()),
