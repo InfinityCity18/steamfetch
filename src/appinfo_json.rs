@@ -25,7 +25,7 @@ pub struct AppInfo {
     pub developers: Vec<String>,
     pub publishers: Vec<String>,
     pub platforms: Platforms,
-    pub recommendations: Recommendations,
+    pub recommendations: Option<Recommendations>,
     #[serde(rename = "release_date")]
     pub release_date: ReleaseDate,
 }
