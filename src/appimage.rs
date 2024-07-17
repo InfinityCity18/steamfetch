@@ -1,8 +1,13 @@
-use crate::error;
+use crate::error::{self, ExitError, IntoResultExitError};
 
-pub fn print_image(url: &str, width: u16, height: u16, x_offset: u16, y_offset: i16) {
-    let response = reqwest::blocking::get(url)
-        .unwrap_or_else(|_| error::error_and_quit(format!("failed to fetch image").as_ref()));
+pub fn print_image(
+    url: &str,
+    width: u16,
+    height: u16,
+    x_offset: u16,
+    y_offset: i16,
+) -> Result<(), ExitError> {
+    let response = reqwest::blocking::get(url).into_exit_error("test")?;
 
     let image = image::load_from_memory(
         &response
@@ -22,4 +27,5 @@ pub fn print_image(url: &str, width: u16, height: u16, x_offset: u16, y_offset: 
     };
 
     viuer::print(&image, &conf).unwrap_or_else(|_| error::error_and_quit("failed to print image"));
+    Ok(())
 }

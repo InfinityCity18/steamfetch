@@ -14,7 +14,7 @@ pub fn get_applist(url: &str) -> AppListRoot {
         .unwrap_or_else(|_| error_and_quit(format!("parsing json failed").as_ref()))
 }
 
-pub fn find_best_app_id(applist: AppListRoot, searched_app_name: &str) -> u32 {
+pub fn find_best_app_id(applist: AppListRoot, lang: &str, searched_app_name: &str) -> u32 {
     let applist = applist.applist.apps.app;
 
     let mut best_ref: Option<&App> = None;
@@ -45,7 +45,7 @@ pub fn find_best_app_id(applist: AppListRoot, searched_app_name: &str) -> u32 {
         );
 
         if app.name.to_lowercase() == searched_app_name.to_lowercase() {
-            match crate::appinfo_query::get_app_info(app.appid) {
+            match crate::appinfo_query::get_app_info(app.appid, lang) {
                 Some(_) => return app.appid,
                 None => continue,
             }

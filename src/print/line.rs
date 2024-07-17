@@ -1,4 +1,4 @@
-use crate::appprint::character::Character;
+use super::character::Character;
 
 #[derive(Clone)]
 pub struct Line<'a> {

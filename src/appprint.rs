@@ -3,9 +3,6 @@ use self::module::Module;
 use crate::appinfo_json::AppInfoRoot;
 use crate::glyphs::{FancyFont, Glyph};
 
-mod character;
-mod constants;
-mod line;
 mod module;
 
 pub fn print_app_info<T: Glyph>(app: AppInfoRoot, width: u16, height: u16, offset: u16) {

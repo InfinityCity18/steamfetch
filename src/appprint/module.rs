@@ -1,16 +1,7 @@
-use crate::{appprint::line::Line, glyphs::Glyph};
-
-use super::character::Character;
-
-pub struct Module<'a> {
-    lines: Vec<Line<'a>>,
-}
+use crate::glyphs::Glyph;
+use crate::print;
 
 impl<'a> Module<'a> {
-    pub fn print(&self) {
-        self.lines.iter().for_each(|line| line.print());
-    }
-
     pub fn frame<T: Glyph>(
         appname: &str,
         width: u16,
@@ -57,9 +48,5 @@ impl<'a> Module<'a> {
         lines.push(appname_line);
 
         Self { lines }
-    }
-
-    pub fn print_image(url: &str, width: u16, height: u16, x_offset: u16, y_offset: i16) {
-        crate::appimage::print_image(url, width, height, x_offset, y_offset);
     }
 }

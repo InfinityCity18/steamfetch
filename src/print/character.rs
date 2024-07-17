@@ -1,4 +1,4 @@
-use crate::appprint::constants::RESET;
+use super::constants::RESET;
 use std::io::Write;
 
 #[derive(Clone, Copy)]
