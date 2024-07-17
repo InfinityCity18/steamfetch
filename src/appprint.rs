@@ -1,64 +1,9 @@
-use std::io::{Chain, Write};
+mod character;
+mod constants;
+mod line;
+mod module;
 
-use crate::appinfo_json::{AppInfo, AppInfoRoot};
-use crate::appreviews_json::QuerySummary;
-use crate::appreviews_query::get_app_reviews;
-use crate::glyphs::{FancyFont, Glyph};
-
-const TEXT_COLOR: &str = "\x1b[36m";
-const RESET: &str = "\x1b[0m";
-const BOLD: &str = "\x1b[1m";
-const GREEN_BG: &str = "\x1b[42m";
-const GREEN_TEXT: &str = "\x1b[92m";
-const BLUE_BG: &str = "\x1b[44m";
-const GREY_BG: &str = "\x1b[100m";
-
-struct Module {
-    lines: Vec<Line>,
-}
-
-struct Line {
-    content: Vec<Character>,
-    whitespace_offset: u16,
-}
-
-struct Character {
-    content: char,
-    fg_color: &'static str,
-    bg_color: &'static str,
-}
-
-impl Module {
-    pub fn print(&self) {
-        self.lines.iter().for_each(|line| line.print());
-    }
-
-    pub fn print_image(url: &str, width: u16, height: u16, x_offset: u16, y_offset: i16) {
-        crate::appimage::print_image(url, width, height, x_offset, y_offset);
-    }
-}
-
-impl Line {
-    fn print(&self) {
-        print!("{}", " ".repeat(self.whitespace_offset.into()));
-        self.content.iter().for_each(|c| c.print());
-        print!("\n");
-    }
-}
-
-impl Character {
-    fn print(&self) {
-        let content: &str = vec![
-            self.fg_color,
-            self.bg_color,
-            &self.content.to_string(),
-            RESET,
-        ]
-        .into_iter()
-        .collect();
-    }
-}
-
+/*
 pub fn print_app_info<T: Glyph>(app: AppInfoRoot, width: u16, height: u16, offset: u16) {
     let app = app.data;
     print!("{}{}", TEXT_COLOR, BOLD);
@@ -130,3 +75,4 @@ fn get_reviews_and_color(reviews: &QuerySummary) -> (String, String) {
         );
     }
 }
+*/
