@@ -2,32 +2,36 @@ use crate::appprint::constants::RESET;
 use std::io::Write;
 
 #[derive(Clone, Copy)]
-pub struct Character {
+pub struct Character<'a> {
     content: char,
-    fg_color: &'static str,
-    bg_color: &'static str,
+    fg_mod: &'a str,
+    bg_color: &'a str,
 }
 
-impl Character {
+impl<'a> Character<'a> {
     pub fn print(&self) {
         let temp = self.content.to_string();
-        let content = vec![self.fg_color, self.bg_color, &temp, RESET];
+        let content = vec![self.fg_mod, self.bg_color, &temp, RESET];
         let mut out = std::io::stdout();
         for x in content {
             out.write(x.as_bytes());
         }
     }
 
-    pub fn create_vec_from_str(
-        text: &str,
-        fg_color: &'static str,
-        bg_color: &'static str,
-    ) -> Vec<Self> {
+    pub fn create(content: char, fg_mod: &'a str, bg_color: &'a str) -> Self {
+        Self {
+            content,
+            fg_mod,
+            bg_color,
+        }
+    }
+
+    pub fn create_vec_from_str(text: &str, fg_mod: &'a str, bg_color: &'a str) -> Vec<Self> {
         let mut vec: Vec<Self> = Vec::new();
         for c in text.chars() {
             vec.push(Self {
                 content: c,
-                fg_color,
+                fg_mod,
                 bg_color,
             });
         }

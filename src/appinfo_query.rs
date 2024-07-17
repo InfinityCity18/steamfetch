@@ -2,10 +2,10 @@ use crate::appinfo_json::AppInfoRoot;
 use crate::error::error_and_quit;
 use serde_json::Value;
 
-pub fn get_app_info(appid: u32) -> Option<AppInfoRoot> {
+pub fn get_app_info(appid: u32, lang: &str) -> Option<AppInfoRoot> {
     let url = format!(
-        "https://store.steampowered.com/api/appdetails/?appids={}",
-        appid
+        "https://store.steampowered.com/api/appdetails/?appids={}&l={}",
+        appid, lang
     );
 
     println!("{}", url);

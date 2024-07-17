@@ -1,14 +1,18 @@
+use self::constants::*;
+use self::module::Module;
+use crate::appinfo_json::AppInfoRoot;
+use crate::glyphs::{FancyFont, Glyph};
+
 mod character;
 mod constants;
 mod line;
 mod module;
 
-/*
 pub fn print_app_info<T: Glyph>(app: AppInfoRoot, width: u16, height: u16, offset: u16) {
     let app = app.data;
-    print!("{}{}", TEXT_COLOR, BOLD);
-
-    let frame = Module::build_image_frame::<FancyFont>(&app.name, width, height, offset);
+    let fg_mod = BOLD.to_string() + TEXT_COLOR;
+    let bg_color = "";
+    let frame = Module::frame::<FancyFont>(&app.name, width, height, &fg_mod, bg_color, offset);
     frame.print();
     Module::print_image(
         &app.header_image,
@@ -17,10 +21,9 @@ pub fn print_app_info<T: Glyph>(app: AppInfoRoot, width: u16, height: u16, offse
         offset,
         -(height as i16) - 1,
     );
-    let price_and_reviews = Module::build_price_reviews_mod::<FancyFont>(&app, width, offset);
-    price_and_reviews.print();
 }
 
+/*
 fn text_line(text: &str, width: u16, infill: &str) -> String {
     let mut output = String::new();
 

@@ -1,6 +1,15 @@
 use crate::error;
 
-const PAIR_OPTIONS: &'static [&'static str] = &["-t", "-token", "--t", "--token"];
+const PAIR_OPTIONS: &'static [&'static str] = &[
+    "-t",
+    "-token",
+    "--t",
+    "--token",
+    "-l",
+    "-lang",
+    "--l",
+    "--language",
+];
 const SINGLE_OPTIONS: &'static [&'static str] = &[
     "-h", "-help", "--h", "--help", "-f", "-font", "--f", "--font",
 ];
