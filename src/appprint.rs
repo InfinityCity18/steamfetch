@@ -1,3 +1,5 @@
+use std::io::{Chain, Write};
+
 use crate::appinfo_json::{AppInfo, AppInfoRoot};
 use crate::appreviews_json::QuerySummary;
 use crate::appreviews_query::get_app_reviews;
@@ -16,118 +18,19 @@ struct Module {
 }
 
 struct Line {
-    outerleft: &'static str,
-    outerright: &'static str,
-    inside: String,
-    offset: u16,
+    content: Vec<Character>,
+    whitespace_offset: u16,
+}
+
+struct Character {
+    content: char,
+    fg_color: &'static str,
+    bg_color: &'static str,
 }
 
 impl Module {
     pub fn print(&self) {
         self.lines.iter().for_each(|line| line.print());
-    }
-
-    pub fn escape_code(code: &str) {
-        print!("{}", code);
-    }
-
-    pub fn build_image_frame<T: Glyph>(
-        app_name: &str,
-        width: u16,
-        height: u16,
-        offset: u16,
-    ) -> Self {
-        let mut lines: Vec<Line> = Vec::new();
-        lines.push(Line {
-            outerleft: T::LEFT_TOP_CORNER,
-            outerright: T::RIGHT_TOP_CORNER,
-            inside: text_line("steamfetch", width, T::BAR),
-            offset,
-        });
-        for _ in 1..=height {
-            lines.push(Line {
-                outerleft: T::PIPE,
-                outerright: T::PIPE,
-                inside: String::from(" ".repeat(width.into())),
-                offset,
-            })
-        }
-        lines.push(Line {
-            outerleft: T::LEFT_T,
-            outerright: T::RIGHT_T,
-            inside: text_line(app_name, width, T::BAR),
-            offset,
-        });
-
-        Self { lines }
-    }
-
-    pub fn build_price_reviews_mod<T: Glyph>(app: &AppInfo, width: u16, offset: u16) -> Self {
-        let mut lines: Vec<Line> = Vec::new();
-        let reviews: QuerySummary = get_app_reviews(app.steam_appid);
-        let (review, review_color) = get_reviews_and_color(&reviews);
-        let (price, price_color) = get_price_and_color(app);
-
-        let price_len = price.chars().count();
-        let review_len = review.chars().count();
-        let diff = width as usize - price_len - review_len - 6;
-
-        lines.push(Line {
-            outerleft: T::PIPE,
-            outerright: T::PIPE,
-            inside: String::from(" ".repeat(width.into())),
-            offset,
-        });
-
-        lines.push(Line {
-            outerleft: T::PIPE,
-            outerright: T::PIPE,
-            inside: format!(
-                " {}{}{}{}{}{}{} ",
-                price_color,
-                " ".repeat(price_len + 2),
-                RESET,
-                " ".repeat(diff),
-                review_color,
-                " ".repeat(review_len + 2),
-                RESET
-            ),
-            offset,
-        });
-
-        lines.push(Line {
-            outerleft: T::PIPE,
-            outerright: T::PIPE,
-            inside: format!(
-                " {} {} {}{}{} {} {} ",
-                price_color,
-                price,
-                RESET,
-                " ".repeat(diff),
-                review_color,
-                review,
-                RESET
-            ),
-            offset,
-        });
-
-        lines.push(Line {
-            outerleft: T::PIPE,
-            outerright: T::PIPE,
-            inside: format!(
-                " {}{}{}{}{}{}{} ",
-                price_color,
-                " ".repeat(price_len + 2),
-                RESET,
-                " ".repeat(diff),
-                review_color,
-                " ".repeat(review_len + 2),
-                RESET
-            ),
-            offset,
-        });
-
-        Self { lines }
     }
 
     pub fn print_image(url: &str, width: u16, height: u16, x_offset: u16, y_offset: i16) {
@@ -137,8 +40,22 @@ impl Module {
 
 impl Line {
     fn print(&self) {
-        print!("{}", " ".repeat(self.offset.into()));
-        print!("{}{}{}\n", self.outerleft, self.inside, self.outerright);
+        print!("{}", " ".repeat(self.whitespace_offset.into()));
+        self.content.iter().for_each(|c| c.print());
+        print!("\n");
+    }
+}
+
+impl Character {
+    fn print(&self) {
+        let content: &str = vec![
+            self.fg_color,
+            self.bg_color,
+            &self.content.to_string(),
+            RESET,
+        ]
+        .into_iter()
+        .collect();
     }
 }
 
