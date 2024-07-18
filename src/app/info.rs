@@ -1,6 +1,7 @@
 mod json;
 
-use json::AppInfoRoot;
+pub use json::AppInfoRoot;
+
 use serde_json::Value;
 
 use crate::error::{ExitResult, IntoResultExitError};

@@ -1,4 +1,4 @@
-use crate::error;
+use crate::error::{ExitError, ExitResult, IntoResultExitError};
 
 const PAIR_OPTIONS: &'static [&'static str] = &[
     "-t",
@@ -28,7 +28,7 @@ pub struct ArgParser {
 }
 
 impl ArgParser {
-    pub fn new() -> Self {
+    pub fn new() -> ExitResult<'static, ArgParser> {
         use std::env;
 
         let mut args = env::args();
@@ -43,7 +43,7 @@ impl ArgParser {
             argument = argument.trim().to_owned();
 
             if argument.len() == 0 {
-                error::error_and_quit(format!("empty arguments are disallowed").as_ref());
+                return Err(ExitError("empty arguments are disallowed"));
             }
 
             match argument.get(0..1).unwrap() {
@@ -51,24 +51,24 @@ impl ArgParser {
                     if SINGLE_OPTIONS.contains(&argument.as_str()) {
                         options.push(ArgOption::Single(argument));
                     } else if PAIR_OPTIONS.contains(&argument.as_str()) {
-                        let next_arg = args.next().unwrap_or_else(|| {
-                            error::error_and_quit(
-                                format!("argument not provided for \"{}\" option", argument)
-                                    .as_ref(),
-                            )
-                        });
+                        let next_arg =
+                            <std::option::Option<std::string::String> as IntoResultExitError<
+                                '_,
+                                std::string::String,
+                                (),
+                            >>::into_exit_error(args.next(), "")?;
                         options.push(ArgOption::Pair(argument, next_arg));
                     } else {
-                        error::error_and_quit(format!("no such option: {}", argument).as_ref());
+                        return Err(ExitError("empty arguments are disallowed"));
                     }
                 }
                 _ => arguments.push(argument),
             }
         }
-        ArgParser {
+        Ok(ArgParser {
             options,
             arguments,
             token,
-        }
+        })
     }
 }

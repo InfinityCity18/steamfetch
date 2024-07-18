@@ -1,7 +1,6 @@
 #![allow(dead_code)]
 
 mod app;
-mod appimage;
 mod applist_query;
 mod appreviews_query;
 mod arg;

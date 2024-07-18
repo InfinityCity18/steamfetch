@@ -1,7 +1,6 @@
 use json::{App, AppsList};
 
-use crate::error::{ExitResult, IntoResultExitError};
-use edit_distance::edit_distance;
+use crate::error::{ExitError, ExitResult, IntoResultExitError};
 use serde_json::Value;
 use std::cmp::Ordering;
 
@@ -16,74 +15,49 @@ impl AppsList {
             .into_exit_error("parsing json failed")
     }
 
-    pub fn get_most_matching_app_id(&self, searched_app_name: &str, lang: &str) {
+    pub fn get_most_matching_app_id(&self, searched_app_name: &str, lang: &str) -> ExitResult<u32> {
         let mut best_ref: Option<&App> = None;
         let mut best_match_value: usize = usize::MAX;
         let mut zero_edit_shortest: usize = usize::MAX;
 
-        for app in &self.apps {}
-    }
-}
+        for app in &self.apps {
+            if app.name.to_lowercase() == searched_app_name.to_lowercase() {
+                match super::info::AppInfoRoot::get_app_info(app.appid, lang) {
+                    Ok(_) => return Ok(app.appid),
+                    Err(_) => continue,
+                }
+            }
+            let edit = get_edit_distance(&app.name, searched_app_name);
 
-pub fn find_best_app_id(applist: AppsList, lang: &str, searched_app_name: &str) -> u32 {
-    let applist = applist.applist.apps.app;
-
-    let mut best_ref: Option<&App> = None;
-    let mut best_match_value: usize = usize::MAX;
-    let mut zero_edit_shortest: usize = usize::MAX;
-
-    for app in &applist {
-        if app.name.to_lowercase() == searched_app_name.to_lowercase() {
-            match crate::appinfo_query::get_app_info(app.appid, lang) {
-                Some(_) => return app.appid,
-                None => continue,
+            if edit == 0 && app.name.len() <= zero_edit_shortest {
+                match super::info::AppInfoRoot::get_app_info(app.appid, lang) {
+                    Ok(_) => (),
+                    Err(_) => continue,
+                }
+                zero_edit_shortest = app.name.len();
+                best_ref = Some(app);
+                best_match_value = edit;
+            } else if edit < best_match_value {
+                match super::info::AppInfoRoot::get_app_info(app.appid, lang) {
+                    Ok(_) => (),
+                    Err(_) => continue,
+                }
+                best_ref = Some(app);
+                best_match_value = edit;
             }
         }
 
-        let edit = match &app
-            .name
-            .len()
-            .partial_cmp(&searched_app_name.len())
-            .expect("lengths should be comparable")
-        {
-            Ordering::Less => edit_distance(
-                &app.name.to_lowercase(),
-                searched_app_name.to_lowercase().as_ref(),
-            ),
-            Ordering::Equal => edit_distance(
-                &app.name.to_lowercase(),
-                searched_app_name.to_lowercase().as_ref(),
-            ),
-            Ordering::Greater => edit_distance(
-                &app.name[..app
-                    .name
-                    .char_indices()
-                    .map(|(i, _)| i)
-                    .nth(searched_app_name.len())
-                    .unwrap_or(app.name.len())]
-                    .to_lowercase(),
-                searched_app_name.to_lowercase().as_ref(),
-            ),
-        };
-
-        if edit == 0 && app.name.len() <= zero_edit_shortest {
-            zero_edit_shortest = app.name.len();
-            best_ref = Some(app);
-            best_match_value = edit;
-        } else if edit < best_match_value {
-            best_ref = Some(app);
-            best_match_value = edit;
+        if let Some(app) = best_ref {
+            return Ok(app.appid);
+        } else {
+            return Err(ExitError("no matching app found"));
         }
-    }
-    if let Some(best_ref) = best_ref {
-        println!("{:#?}", best_ref);
-        return best_ref.appid;
-    } else {
-        error_and_quit(format!("applist was empty").as_ref());
     }
 }
 
 fn get_edit_distance(app_name: &str, searched_app_name: &str) -> usize {
+    use edit_distance::edit_distance;
+
     match app_name
         .len()
         .partial_cmp(&searched_app_name.len())

@@ -1,4 +1,3 @@
-mod image;
 mod info;
 mod links;
 mod list;
