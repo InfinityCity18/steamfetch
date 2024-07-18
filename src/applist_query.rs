@@ -1,19 +1,3 @@
-use std::cmp::Ordering;
-
-use edit_distance::edit_distance;
-
-use crate::applist_json::{App, AppListRoot};
-use crate::error::error_and_quit;
-
-pub fn get_applist(url: &str) -> AppListRoot {
-    let response = reqwest::blocking::get(url)
-        .unwrap_or_else(|_| error_and_quit(format!("failed to get data from \"{url}\"").as_ref()));
-
-    response
-        .json()
-        .unwrap_or_else(|_| error_and_quit(format!("parsing json failed").as_ref()))
-}
-
 pub fn find_best_app_id(applist: AppListRoot, lang: &str, searched_app_name: &str) -> u32 {
     let applist = applist.applist.apps.app;
 

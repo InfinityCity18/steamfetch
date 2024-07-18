@@ -3,20 +3,9 @@ use serde_derive::Serialize;
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct AppListRoot {
-    pub applist: Applist,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Applist {
-    pub apps: Apps,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
-pub struct Apps {
-    pub app: Vec<App>,
+pub struct AppsList {
+    #[serde(rename = "app")]
+    pub apps: Vec<App>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]

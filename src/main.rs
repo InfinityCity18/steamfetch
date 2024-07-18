@@ -1,10 +1,7 @@
 #![allow(dead_code)]
 
-use applist_query::{find_best_app_id, get_applist};
-
 mod app;
 mod appimage;
-mod appinfo_query;
 mod applist_query;
 mod appreviews_query;
 mod arg;
