@@ -1,5 +1,4 @@
 use crate::glyphs::Glyph;
-use crate::print;
 
 impl<'a> Module<'a> {
     pub fn frame<T: Glyph>(

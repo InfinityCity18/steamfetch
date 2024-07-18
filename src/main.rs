@@ -2,13 +2,10 @@
 
 use applist_query::{find_best_app_id, get_applist};
 
+mod app;
 mod appimage;
-mod appinfo_json;
 mod appinfo_query;
-mod applist_json;
 mod applist_query;
-mod appprint;
-mod appreviews_json;
 mod appreviews_query;
 mod arg;
 mod error;
@@ -31,8 +28,4 @@ fn main() {
     let width = 48;
     let height = (width * 10) / 46;
     let offset = 0;
-
-    let test = crate::print::Character::create_vec_from_str("wda", "w", "a");
-
-    appprint::print_app_info::<crate::glyphs::FancyFont>(data, width, height, offset);
 }

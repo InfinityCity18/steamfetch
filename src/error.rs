@@ -1,3 +1,10 @@
+pub fn print_and_exit(msg: &str) {
+    eprintln!("steamfetch : {msg}");
+    std::process::exit(1);
+}
+
+pub type ExitResult<'a, T> = Result<T, ExitError<'a>>;
+
 pub struct ExitError<'a>(&'a str);
 
 pub trait IntoResultExitError<'a, T, E> {
