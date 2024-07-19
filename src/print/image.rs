@@ -6,7 +6,7 @@ pub fn print_image(
     height: u16,
     x_offset: u16,
     y_offset: i16,
-) -> ExitResult<()> {
+) -> ExitResult<'static, ()> {
     let response = reqwest::blocking::get(url).into_exit_error("failed to fetch image")?;
 
     let image = image::load_from_memory(

@@ -1,5 +1,3 @@
-use std::fmt::format;
-
 use super::super::info::AppInfoRoot;
 use super::super::reviews::QuerySummary;
 use crate::glyphs::Glyph;
@@ -69,6 +67,9 @@ impl<'a> Module<'a> {
 
         let pipe = Character::create(T::PIPE, fg_mod, bg_color);
         let whitespace = Character::create(' ', fg_mod, bg_color);
+        let left_corner = Character::create(T::LEFT_BOT_CORNER, fg_mod, bg_color);
+        let right_corner = Character::create(T::RIGHT_BOT_CORNER, fg_mod, bg_color);
+        let bar = Character::create(T::BAR, fg_mod, bg_color);
 
         let mut price = Character::create_vec_from_str("Price", fg_mod, bg_color);
         price.append(&mut Character::create_vec_from_str(": ", NONE, NONE));
@@ -113,14 +114,14 @@ impl<'a> Module<'a> {
         let mut review = Character::create_vec_from_str("Reviews", fg_mod, bg_color);
         review.append(&mut Character::create_vec_from_str(": ", NONE, NONE));
         if reviews.review_score_desc == "No user reviews" {
-            review.push(Character::create(T::LEFT_HALF_CIRCLE, GREY_BG, NONE));
+            review.push(Character::create(T::LEFT_HALF_CIRCLE, GREY_FG, NONE));
             review.append(&mut Character::create_vec_from_str("Free", NONE, GREY_BG));
-            review.push(Character::create(T::RIGHT_HALF_CIRCLE, GREY_BG, NONE));
+            review.push(Character::create(T::RIGHT_HALF_CIRCLE, GREY_FG, NONE));
         } else {
             let percentage = ((reviews.total_positive as f64 / reviews.total_reviews as f64)
                 * 100.0)
                 .round() as u32;
-            review.push(Character::create(T::LEFT_HALF_CIRCLE, BLUE_BG, NONE));
+            review.push(Character::create(T::LEFT_HALF_CIRCLE, BLUE_FG, NONE));
             review.append(&mut Character::create_vec_from_str(
                 format!(
                     "{}, {}% ({})",
@@ -130,7 +131,7 @@ impl<'a> Module<'a> {
                 NONE,
                 BLUE_BG,
             ));
-            review.push(Character::create(T::RIGHT_HALF_CIRCLE, BLUE_BG, NONE));
+            review.push(Character::create(T::RIGHT_HALF_CIRCLE, BLUE_FG, NONE));
         }
         Line::border_filling_wrapping_text(
             width,
@@ -156,6 +157,23 @@ impl<'a> Module<'a> {
             whitespace,
             whitespace_offset,
             release,
+        )
+        .into_iter()
+        .for_each(|l| lines.push(l));
+
+        let mut players_cnt = Character::create_vec_from_str("Player count", fg_mod, bg_color);
+        players_cnt.append(&mut Character::create_vec_from_str(
+            format!(": {}", player_count).as_ref(),
+            NONE,
+            NONE,
+        ));
+        Line::border_filling_wrapping_text(
+            width,
+            pipe,
+            pipe,
+            whitespace,
+            whitespace_offset,
+            players_cnt,
         )
         .into_iter()
         .for_each(|l| lines.push(l));
@@ -194,6 +212,36 @@ impl<'a> Module<'a> {
         .into_iter()
         .for_each(|l| lines.push(l));
 
+        let mut platforms = Character::create_vec_from_str("Platforms", fg_mod, bg_color);
+        let mut platforms_str = String::new();
+        if app.data.platforms.linux {
+            platforms_str += &T::LINUX.to_string();
+            platforms_str += " ";
+        }
+        if app.data.platforms.mac {
+            platforms_str += &T::MACOS.to_string();
+            platforms_str += " ";
+        }
+        if app.data.platforms.windows {
+            platforms_str += &T::WINDOWS.to_string();
+            platforms_str += " ";
+        }
+        platforms.append(&mut Character::create_vec_from_str(
+            format!(": {}", platforms_str).as_ref(),
+            NONE,
+            NONE,
+        ));
+        Line::border_filling_wrapping_text(
+            width,
+            pipe,
+            pipe,
+            whitespace,
+            whitespace_offset,
+            platforms,
+        )
+        .into_iter()
+        .for_each(|l| lines.push(l));
+
         let mut description = Character::create_vec_from_str("Description", fg_mod, bg_color);
         description.append(&mut Character::create_vec_from_str(
             format!(": {}", app.data.short_description).as_ref(),
@@ -210,6 +258,14 @@ impl<'a> Module<'a> {
         )
         .into_iter()
         .for_each(|l| lines.push(l));
+
+        lines.push(Line::border_and_filling(
+            width,
+            left_corner,
+            right_corner,
+            bar,
+            whitespace_offset,
+        ));
 
         Self { lines }
     }

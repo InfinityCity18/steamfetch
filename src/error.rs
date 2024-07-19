@@ -5,6 +5,7 @@ pub fn print_error_and_exit(err: ExitError) -> ! {
 
 pub type ExitResult<'a, T> = Result<T, ExitError<'a>>;
 
+#[derive(Debug)]
 pub struct ExitError<'a>(pub &'a str); //change to String
 
 pub trait IntoResultExitError<'a, T> {

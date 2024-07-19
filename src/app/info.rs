@@ -9,7 +9,7 @@ use crate::error::{ExitResult, IntoResultExitError};
 use super::links::{APP_INFO, APP_PLAYERS};
 
 impl AppInfoRoot {
-    pub fn get_app_info(app_id: u32, lang: &str) -> ExitResult<AppInfoRoot> {
+    pub fn get_app_info(app_id: u32, lang: &str) -> ExitResult<'static, AppInfoRoot> {
         let url = APP_INFO
             .replace("{1}", &app_id.to_string())
             .replace("{2}", lang);

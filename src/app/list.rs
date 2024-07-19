@@ -1,4 +1,6 @@
-use json::{App, AppsList};
+use json::App;
+
+pub use json::AppsList;
 
 use crate::error::{ExitError, ExitResult, IntoResultExitError};
 use serde_json::Value;
@@ -7,7 +9,8 @@ use std::cmp::Ordering;
 mod json;
 
 impl AppsList {
-    pub fn get_applist(url: &str) -> ExitResult<AppsList> {
+    pub fn get_applist() -> ExitResult<'static, AppsList> {
+        let url = super::links::APP_LIST;
         let response = reqwest::blocking::get(url).into_exit_error("fetching applist failed")?;
 
         let mut list: Value = response.json().into_exit_error("parsing json failed")?;
@@ -15,7 +18,11 @@ impl AppsList {
             .into_exit_error("parsing json failed")
     }
 
-    pub fn get_most_matching_app_id(&self, searched_app_name: &str, lang: &str) -> ExitResult<u32> {
+    pub fn get_most_matching_app_id(
+        &self,
+        searched_app_name: &str,
+        lang: &str,
+    ) -> ExitResult<'static, u32> {
         let mut best_ref: Option<&App> = None;
         let mut best_match_value: usize = usize::MAX;
         let mut zero_edit_shortest: usize = usize::MAX;

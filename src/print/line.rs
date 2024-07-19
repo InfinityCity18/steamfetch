@@ -10,7 +10,7 @@ pub struct Line<'a> {
 }
 
 impl<'a> Line<'a> {
-    pub(super) fn print(&self) -> ExitResult<()> {
+    pub(super) fn print(&self) -> ExitResult<'static, ()> {
         print!("{}", " ".repeat(self.whitespace_offset.into()));
         for c in &self.content {
             c.print()?;

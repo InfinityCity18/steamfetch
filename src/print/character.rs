@@ -11,7 +11,7 @@ pub struct Character<'a> {
 }
 
 impl<'a> Character<'a> {
-    pub(super) fn print(&self) -> ExitResult<()> {
+    pub(super) fn print(&self) -> ExitResult<'static, ()> {
         let temp = self.content.to_string();
         let content = vec![self.fg_mod, self.bg_color, &temp, RESET];
         let mut out = std::io::stdout();
