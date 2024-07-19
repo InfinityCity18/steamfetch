@@ -1,3 +1,5 @@
+use std::fmt::format;
+
 use super::super::info::AppInfoRoot;
 use super::super::reviews::QuerySummary;
 use crate::glyphs::Glyph;
@@ -65,7 +67,6 @@ impl<'a> Module<'a> {
     ) -> Self {
         let mut lines: Vec<Line> = Vec::new();
 
-        let bar = Character::create(T::BAR, fg_mod, bg_color);
         let pipe = Character::create(T::PIPE, fg_mod, bg_color);
         let whitespace = Character::create(' ', fg_mod, bg_color);
 
@@ -75,13 +76,140 @@ impl<'a> Module<'a> {
             price.push(Character::create(T::LEFT_HALF_CIRCLE, BLUE_BG, NONE));
             price.append(&mut Character::create_vec_from_str("Free", NONE, BLUE_BG));
             price.push(Character::create(T::RIGHT_HALF_CIRCLE, BLUE_BG, NONE));
-        } else if app.data.price_overview.unwrap().discount_percent == 0 {
+        } else if app.data.price_overview.as_ref().unwrap().discount_percent == 0 {
             price.append(&mut Character::create_vec_from_str(
-                app.data.price_overview.unwrap().final_formatted,
+                &app.data.price_overview.as_ref().unwrap().final_formatted,
                 NONE,
                 NONE,
             ));
+        } else {
+            price.push(Character::create(T::LEFT_HALF_CIRCLE, GREEN_DARK, NONE));
+            price.append(&mut Character::create_vec_from_str(
+                format!(
+                    "{} at -{}%",
+                    app.data.price_overview.as_ref().unwrap().final_formatted,
+                    app.data.price_overview.as_ref().unwrap().discount_percent
+                )
+                .as_ref(),
+                GREEN_LIGHT,
+                GREEN_DARK,
+            ));
+            price.push(Character::create(T::RIGHT_HALF_CIRCLE, GREEN_DARK, NONE));
         }
+        Line::border_filling_wrapping_text(width, pipe, pipe, whitespace, whitespace_offset, price)
+            .into_iter()
+            .for_each(|l| lines.push(l));
+
+        let mut id = Character::create_vec_from_str("ID", fg_mod, bg_color);
+        id.append(&mut Character::create_vec_from_str(
+            format!(": {}", app.data.steam_appid).as_ref(),
+            NONE,
+            NONE,
+        ));
+        Line::border_filling_wrapping_text(width, pipe, pipe, whitespace, whitespace_offset, id)
+            .into_iter()
+            .for_each(|l| lines.push(l));
+
+        let mut review = Character::create_vec_from_str("Reviews", fg_mod, bg_color);
+        review.append(&mut Character::create_vec_from_str(": ", NONE, NONE));
+        if reviews.review_score_desc == "No user reviews" {
+            review.push(Character::create(T::LEFT_HALF_CIRCLE, GREY_BG, NONE));
+            review.append(&mut Character::create_vec_from_str("Free", NONE, GREY_BG));
+            review.push(Character::create(T::RIGHT_HALF_CIRCLE, GREY_BG, NONE));
+        } else {
+            let percentage = ((reviews.total_positive as f64 / reviews.total_reviews as f64)
+                * 100.0)
+                .round() as u32;
+            review.push(Character::create(T::LEFT_HALF_CIRCLE, BLUE_BG, NONE));
+            review.append(&mut Character::create_vec_from_str(
+                format!(
+                    "{}, {}% ({})",
+                    reviews.review_score_desc, percentage, reviews.total_reviews
+                )
+                .as_ref(),
+                NONE,
+                BLUE_BG,
+            ));
+            review.push(Character::create(T::RIGHT_HALF_CIRCLE, BLUE_BG, NONE));
+        }
+        Line::border_filling_wrapping_text(
+            width,
+            pipe,
+            pipe,
+            whitespace,
+            whitespace_offset,
+            review,
+        )
+        .into_iter()
+        .for_each(|l| lines.push(l));
+
+        let mut release = Character::create_vec_from_str("Release date", fg_mod, bg_color);
+        release.append(&mut Character::create_vec_from_str(
+            format!(": {}", app.data.release_date.date).as_ref(),
+            NONE,
+            NONE,
+        ));
+        Line::border_filling_wrapping_text(
+            width,
+            pipe,
+            pipe,
+            whitespace,
+            whitespace_offset,
+            release,
+        )
+        .into_iter()
+        .for_each(|l| lines.push(l));
+
+        let mut developer = Character::create_vec_from_str("Developer", fg_mod, bg_color);
+        developer.append(&mut Character::create_vec_from_str(
+            format!(": {}", app.data.developers[0]).as_ref(),
+            NONE,
+            NONE,
+        ));
+        Line::border_filling_wrapping_text(
+            width,
+            pipe,
+            pipe,
+            whitespace,
+            whitespace_offset,
+            developer,
+        )
+        .into_iter()
+        .for_each(|l| lines.push(l));
+
+        let mut publisher = Character::create_vec_from_str("Publisher", fg_mod, bg_color);
+        publisher.append(&mut Character::create_vec_from_str(
+            format!(": {}", app.data.publishers[0]).as_ref(),
+            NONE,
+            NONE,
+        ));
+        Line::border_filling_wrapping_text(
+            width,
+            pipe,
+            pipe,
+            whitespace,
+            whitespace_offset,
+            publisher,
+        )
+        .into_iter()
+        .for_each(|l| lines.push(l));
+
+        let mut description = Character::create_vec_from_str("Description", fg_mod, bg_color);
+        description.append(&mut Character::create_vec_from_str(
+            format!(": {}", app.data.short_description).as_ref(),
+            NONE,
+            NONE,
+        ));
+        Line::border_filling_wrapping_text(
+            width,
+            pipe,
+            pipe,
+            whitespace,
+            whitespace_offset,
+            description,
+        )
+        .into_iter()
+        .for_each(|l| lines.push(l));
 
         Self { lines }
     }
