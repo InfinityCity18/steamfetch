@@ -1,4 +1,7 @@
+use super::super::info::AppInfoRoot;
+use super::super::reviews::QuerySummary;
 use crate::glyphs::Glyph;
+use crate::print::constants::*;
 
 use crate::print::{Character, Line, Module};
 
@@ -52,11 +55,34 @@ impl<'a> Module<'a> {
     }
 
     pub fn app_info<T: Glyph>(
+        app: &AppInfoRoot,
+        reviews: &QuerySummary,
+        player_count: u32,
         width: u16,
         fg_mod: &'a str,
         bg_color: &'a str,
         whitespace_offset: u16,
     ) -> Self {
         let mut lines: Vec<Line> = Vec::new();
+
+        let bar = Character::create(T::BAR, fg_mod, bg_color);
+        let pipe = Character::create(T::PIPE, fg_mod, bg_color);
+        let whitespace = Character::create(' ', fg_mod, bg_color);
+
+        let mut price = Character::create_vec_from_str("Price", fg_mod, bg_color);
+        price.append(&mut Character::create_vec_from_str(": ", NONE, NONE));
+        if app.data.is_free {
+            price.push(Character::create(T::LEFT_HALF_CIRCLE, BLUE_BG, NONE));
+            price.append(&mut Character::create_vec_from_str("Free", NONE, BLUE_BG));
+            price.push(Character::create(T::RIGHT_HALF_CIRCLE, BLUE_BG, NONE));
+        } else if app.data.price_overview.unwrap().discount_percent == 0 {
+            price.append(&mut Character::create_vec_from_str(
+                app.data.price_overview.unwrap().final_formatted,
+                NONE,
+                NONE,
+            ));
+        }
+
+        Self { lines }
     }
 }

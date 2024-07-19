@@ -1,5 +1,5 @@
 mod character;
-mod constants;
+pub mod constants;
 mod image;
 mod line;
 mod module;

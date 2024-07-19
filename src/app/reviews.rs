@@ -1,8 +1,9 @@
 mod json;
 
+pub use json::QuerySummary;
+
 use super::links::APP_REVIEWS;
 use crate::error::{ExitResult, IntoResultExitError};
-use json::QuerySummary;
 use serde_json::Value;
 
 impl QuerySummary {

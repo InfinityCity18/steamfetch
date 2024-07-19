@@ -7,6 +7,8 @@ pub trait Glyph {
     const PIPE: char;
     const LEFT_T: char;
     const RIGHT_T: char;
+    const LEFT_HALF_CIRCLE: char;
+    const RIGHT_HALF_CIRCLE: char;
 }
 
 pub struct NoFancyFont;
@@ -21,6 +23,8 @@ impl Glyph for NoFancyFont {
     const PIPE: char = '|';
     const LEFT_T: char = '#';
     const RIGHT_T: char = '#';
+    const LEFT_HALF_CIRCLE: char = ' ';
+    const RIGHT_HALF_CIRCLE: char = ' ';
 }
 
 impl Glyph for FancyFont {
@@ -32,4 +36,6 @@ impl Glyph for FancyFont {
     const PIPE: char = '│';
     const LEFT_T: char = '├';
     const RIGHT_T: char = '┤';
+    const LEFT_HALF_CIRCLE: char = '';
+    const RIGHT_HALF_CIRCLE: char = '';
 }
