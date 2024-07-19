@@ -1,3 +1,5 @@
+use crate::error::{ExitResult, IntoResultExitError};
+
 use super::constants::RESET;
 use std::io::Write;
 
@@ -9,13 +11,15 @@ pub struct Character<'a> {
 }
 
 impl<'a> Character<'a> {
-    pub fn print(&self) {
+    pub(super) fn print(&self) -> ExitResult<()> {
         let temp = self.content.to_string();
         let content = vec![self.fg_mod, self.bg_color, &temp, RESET];
         let mut out = std::io::stdout();
         for x in content {
-            out.write(x.as_bytes());
+            out.write(x.as_bytes())
+                .into_exit_error("writing to stdout failed")?;
         }
+        Ok(())
     }
 
     pub fn create(content: char, fg_mod: &'a str, bg_color: &'a str) -> Self {

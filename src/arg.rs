@@ -51,12 +51,9 @@ impl ArgParser {
                     if SINGLE_OPTIONS.contains(&argument.as_str()) {
                         options.push(ArgOption::Single(argument));
                     } else if PAIR_OPTIONS.contains(&argument.as_str()) {
-                        let next_arg =
-                            <std::option::Option<std::string::String> as IntoResultExitError<
-                                '_,
-                                std::string::String,
-                                (),
-                            >>::into_exit_error(args.next(), "")?;
+                        let next_arg = args
+                            .next()
+                            .into_exit_error("argument was not supplied for one of options")?;
                         options.push(ArgOption::Pair(argument, next_arg));
                     } else {
                         return Err(ExitError("empty arguments are disallowed"));

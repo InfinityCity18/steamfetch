@@ -5,13 +5,13 @@ pub fn print_error_and_exit(err: ExitError) -> ! {
 
 pub type ExitResult<'a, T> = Result<T, ExitError<'a>>;
 
-pub struct ExitError<'a>(pub &'a str);
+pub struct ExitError<'a>(pub &'a str); //change to String
 
-pub trait IntoResultExitError<'a, T, E> {
+pub trait IntoResultExitError<'a, T> {
     fn into_exit_error(self, msg: &'a str) -> Result<T, ExitError<'a>>;
 }
 
-impl<'a, T, E> IntoResultExitError<'a, T, E> for Result<T, E> {
+impl<'a, T, E> IntoResultExitError<'a, T> for Result<T, E> {
     fn into_exit_error(self, msg: &'a str) -> Result<T, ExitError<'a>> {
         match self {
             Ok(ok) => Ok(ok),
@@ -20,7 +20,7 @@ impl<'a, T, E> IntoResultExitError<'a, T, E> for Result<T, E> {
     }
 }
 
-impl<'a, T, E> IntoResultExitError<'a, T, E> for Option<T> {
+impl<'a, T> IntoResultExitError<'a, T> for Option<T> {
     fn into_exit_error(self, msg: &'a str) -> Result<T, ExitError<'a>> {
         match self {
             Some(ok) => Ok(ok),

@@ -1,5 +1,7 @@
 use crate::glyphs::Glyph;
 
+use crate::print::{Character, Line, Module};
+
 impl<'a> Module<'a> {
     pub fn frame<T: Glyph>(
         appname: &str,
@@ -47,5 +49,14 @@ impl<'a> Module<'a> {
         lines.push(appname_line);
 
         Self { lines }
+    }
+
+    pub fn app_info<T: Glyph>(
+        width: u16,
+        fg_mod: &'a str,
+        bg_color: &'a str,
+        whitespace_offset: u16,
+    ) -> Self {
+        let mut lines: Vec<Line> = Vec::new();
     }
 }

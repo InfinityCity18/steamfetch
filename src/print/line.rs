@@ -1,4 +1,7 @@
+use std::collections::VecDeque;
+
 use super::character::Character;
+use crate::error::ExitResult;
 
 #[derive(Clone)]
 pub struct Line<'a> {
@@ -7,10 +10,13 @@ pub struct Line<'a> {
 }
 
 impl<'a> Line<'a> {
-    pub fn print(&self) {
+    pub(super) fn print(&self) -> ExitResult<()> {
         print!("{}", " ".repeat(self.whitespace_offset.into()));
-        self.content.iter().for_each(|c| c.print());
+        for c in &self.content {
+            c.print()?;
+        }
         print!("\n");
+        Ok(())
     }
 
     pub fn border_and_filling(
@@ -49,7 +55,6 @@ impl<'a> Line<'a> {
         for _ in 1..=left {
             content.push(filling);
         }
-
         for mut c in text {
             if c.get_char() == ' ' {
                 c.set_char(filling.get_char());
@@ -67,5 +72,42 @@ impl<'a> Line<'a> {
             content,
             whitespace_offset,
         }
+    }
+
+    pub fn border_filling_wrapping_text(
+        width: u16,
+        border_left: Character<'a>,
+        border_right: Character<'a>,
+        filling: Character<'a>,
+        whitespace_offset: u16,
+        text: Vec<Character<'a>>,
+    ) -> Vec<Self> {
+        let mut text: VecDeque<Character> = text.into();
+        let mut lines: Vec<Line> = Vec::new();
+
+        let space_for_text = width - 2;
+
+        while !text.is_empty() {
+            let mut content: Vec<Character> = Vec::new();
+            content.push(border_left);
+            content.push(filling);
+
+            for _ in 1..=space_for_text {
+                if let Some(c) = text.pop_front() {
+                    content.push(c);
+                } else {
+                    content.push(filling);
+                }
+            }
+            content.push(filling);
+            content.push(border_right);
+
+            lines.push(Self {
+                content,
+                whitespace_offset,
+            })
+        }
+
+        lines
     }
 }
