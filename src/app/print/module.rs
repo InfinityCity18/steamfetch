@@ -27,6 +27,8 @@ impl<'a> Module<'a> {
         let appname = Character::create_vec_from_str(appname, fg_mod, bg_color);
 
         let bar_line = Line::border_and_filling(width, pipe, pipe, whitespace, whitespace_offset);
+        let whitespace_line =
+            Line::border_and_filling(width, whitespace, whitespace, whitespace, whitespace_offset);
 
         let steamfetch_line = Line::border_and_filling_with_centered_text(
             width,
@@ -45,6 +47,7 @@ impl<'a> Module<'a> {
             appname,
         );
 
+        lines.push(whitespace_line);
         lines.push(steamfetch_line);
         for _ in 1..=height {
             lines.push(bar_line.clone());
@@ -57,7 +60,7 @@ impl<'a> Module<'a> {
     pub fn app_info<T: Glyph>(
         app: &AppInfoRoot,
         reviews: &QuerySummary,
-        player_count: u32,
+        player_count: Option<u32>,
         width: u16,
         fg_mod: &'a str,
         bg_color: &'a str,
@@ -71,36 +74,44 @@ impl<'a> Module<'a> {
         let right_corner = Character::create(T::RIGHT_BOT_CORNER, fg_mod, bg_color);
         let bar = Character::create(T::BAR, fg_mod, bg_color);
 
-        let mut price = Character::create_vec_from_str("Price", fg_mod, bg_color);
-        price.append(&mut Character::create_vec_from_str(": ", NONE, NONE));
-        if app.data.is_free {
-            price.push(Character::create(T::LEFT_HALF_CIRCLE, BLUE_BG, NONE));
-            price.append(&mut Character::create_vec_from_str("Free", NONE, BLUE_BG));
-            price.push(Character::create(T::RIGHT_HALF_CIRCLE, BLUE_BG, NONE));
-        } else if app.data.price_overview.as_ref().unwrap().discount_percent == 0 {
-            price.append(&mut Character::create_vec_from_str(
-                &app.data.price_overview.as_ref().unwrap().final_formatted,
-                NONE,
-                NONE,
-            ));
-        } else {
-            price.push(Character::create(T::LEFT_HALF_CIRCLE, GREEN_DARK, NONE));
-            price.append(&mut Character::create_vec_from_str(
-                format!(
-                    "{} at -{}%",
-                    app.data.price_overview.as_ref().unwrap().final_formatted,
-                    app.data.price_overview.as_ref().unwrap().discount_percent
-                )
-                .as_ref(),
-                GREEN_LIGHT,
-                GREEN_DARK,
-            ));
-            price.push(Character::create(T::RIGHT_HALF_CIRCLE, GREEN_DARK, NONE));
-        }
-        Line::border_filling_wrapping_text(width, pipe, pipe, whitespace, whitespace_offset, price)
+        if app.data.price_overview.is_some() {
+            let mut price = Character::create_vec_from_str("Price", fg_mod, bg_color);
+            price.append(&mut Character::create_vec_from_str(": ", NONE, NONE));
+            if app.data.is_free {
+                price.push(Character::create(T::LEFT_HALF_CIRCLE, BLUE_BG, NONE));
+                price.append(&mut Character::create_vec_from_str("Free", NONE, BLUE_BG));
+                price.push(Character::create(T::RIGHT_HALF_CIRCLE, BLUE_BG, NONE));
+            } else if app.data.price_overview.as_ref().unwrap().discount_percent == 0 {
+                price.append(&mut Character::create_vec_from_str(
+                    &app.data.price_overview.as_ref().unwrap().final_formatted,
+                    NONE,
+                    NONE,
+                ));
+            } else {
+                price.push(Character::create(T::LEFT_HALF_CIRCLE, GREEN_DARK_FG, NONE));
+                price.append(&mut Character::create_vec_from_str(
+                    format!(
+                        "{} at -{}%",
+                        app.data.price_overview.as_ref().unwrap().final_formatted,
+                        app.data.price_overview.as_ref().unwrap().discount_percent
+                    )
+                    .as_ref(),
+                    GREEN_LIGHT_FG,
+                    GREEN_DARK_BG,
+                ));
+                price.push(Character::create(T::RIGHT_HALF_CIRCLE, GREEN_DARK_FG, NONE));
+            }
+            Line::border_filling_wrapping_text(
+                width,
+                pipe,
+                pipe,
+                whitespace,
+                whitespace_offset,
+                price,
+            )
             .into_iter()
             .for_each(|l| lines.push(l));
-
+        }
         let mut id = Character::create_vec_from_str("ID", fg_mod, bg_color);
         id.append(&mut Character::create_vec_from_str(
             format!(": {}", app.data.steam_appid).as_ref(),
@@ -115,7 +126,11 @@ impl<'a> Module<'a> {
         review.append(&mut Character::create_vec_from_str(": ", NONE, NONE));
         if reviews.review_score_desc == "No user reviews" {
             review.push(Character::create(T::LEFT_HALF_CIRCLE, GREY_FG, NONE));
-            review.append(&mut Character::create_vec_from_str("Free", NONE, GREY_BG));
+            review.append(&mut Character::create_vec_from_str(
+                "No user reviews",
+                NONE,
+                GREY_BG,
+            ));
             review.push(Character::create(T::RIGHT_HALF_CIRCLE, GREY_FG, NONE));
         } else {
             let percentage = ((reviews.total_positive as f64 / reviews.total_reviews as f64)
@@ -161,22 +176,24 @@ impl<'a> Module<'a> {
         .into_iter()
         .for_each(|l| lines.push(l));
 
-        let mut players_cnt = Character::create_vec_from_str("Player count", fg_mod, bg_color);
-        players_cnt.append(&mut Character::create_vec_from_str(
-            format!(": {}", player_count).as_ref(),
-            NONE,
-            NONE,
-        ));
-        Line::border_filling_wrapping_text(
-            width,
-            pipe,
-            pipe,
-            whitespace,
-            whitespace_offset,
-            players_cnt,
-        )
-        .into_iter()
-        .for_each(|l| lines.push(l));
+        if player_count.is_some() {
+            let mut players_cnt = Character::create_vec_from_str("Player count", fg_mod, bg_color);
+            players_cnt.append(&mut Character::create_vec_from_str(
+                format!(": {}", player_count.unwrap()).as_ref(),
+                NONE,
+                NONE,
+            ));
+            Line::border_filling_wrapping_text(
+                width,
+                pipe,
+                pipe,
+                whitespace,
+                whitespace_offset,
+                players_cnt,
+            )
+            .into_iter()
+            .for_each(|l| lines.push(l));
+        }
 
         let mut developer = Character::create_vec_from_str("Developer", fg_mod, bg_color);
         developer.append(&mut Character::create_vec_from_str(

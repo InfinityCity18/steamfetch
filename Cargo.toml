@@ -3,6 +3,9 @@ name = "steamfetch"
 version = "0.1.0"
 edition = "2021"
 
+[profile.release]
+overflow-checks = true
+
 [dependencies]
 edit-distance = "2.1.2"
 image = "0.24"

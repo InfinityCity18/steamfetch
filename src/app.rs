@@ -4,11 +4,7 @@ mod list;
 mod print;
 mod reviews;
 
-use crate::{
-    error::{ExitResult, IntoResultExitError},
-    glyphs::Glyph,
-    print::Module,
-};
+use crate::{error::ExitResult, glyphs::Glyph, print::Module};
 
 pub fn print<T: Glyph>(
     app_name: &str,

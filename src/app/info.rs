@@ -22,7 +22,7 @@ impl AppInfoRoot {
             .into_exit_error("parsing json failed")
     }
 
-    pub fn get_player_count(app_id: u32) -> ExitResult<'static, u32> {
+    pub fn get_player_count(app_id: u32) -> ExitResult<'static, Option<u32>> {
         let url = APP_PLAYERS.replace("{}", &app_id.to_string());
 
         let response =
@@ -30,7 +30,6 @@ impl AppInfoRoot {
 
         let mut data: Value = response.json().into_exit_error("parsing json failed")?;
 
-        serde_json::from_value(data["response"]["player_count"].take())
-            .into_exit_error("parsing json failed")
+        Ok(serde_json::from_value(data["response"]["player_count"].take()).ok())
     }
 }
