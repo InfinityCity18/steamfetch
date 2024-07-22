@@ -1,6 +1,7 @@
 use std::str::FromStr;
 
 use crate::{
+    app::print,
     error::{ExitError, ExitResult, IntoResultExitError},
     glyphs::{FancyFont, NoFancyFont},
 };
@@ -116,10 +117,19 @@ impl ArgParser {
         match command.as_ref() {
             "app" | _ => {
                 let mut iter = self.commands.iter();
-                let mut app_name = String::from_str(iter.next().to_owned().unwrap()).unwrap();
+                let first_arg = iter.next().to_owned().unwrap();
+                let mut app_name;
+                if first_arg == "app" {
+                    app_name = String::new();
+                } else {
+                    app_name = String::from_str(first_arg).unwrap();
+                }
                 while let Some(comm) = iter.next() {
                     app_name += " ";
                     app_name += comm;
+                }
+                if first_arg == "app" {
+                    app_name.remove(0);
                 }
 
                 let fg_mod =

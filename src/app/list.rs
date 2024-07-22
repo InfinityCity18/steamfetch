@@ -1,10 +1,18 @@
 use json::App;
 
+use rayon::prelude::*;
+
 pub use json::AppsList;
 
-use crate::error::{ExitError, ExitResult, IntoResultExitError};
+use crate::{
+    error::{ExitError, ExitResult, IntoResultExitError},
+    print,
+};
 use serde_json::Value;
-use std::cmp::Ordering;
+use std::{
+    cmp::Ordering,
+    sync::{Arc, Mutex},
+};
 
 mod json;
 
@@ -23,42 +31,54 @@ impl AppsList {
         searched_app_name: &str,
         lang: &str,
     ) -> ExitResult<'static, u32> {
-        let mut best_ref: Option<&App> = None;
-        let mut best_match_value: usize = usize::MAX;
-        let mut zero_edit_shortest: usize = usize::MAX;
+        let best_match_value_lock: Arc<Mutex<usize>> = Arc::new(Mutex::new(usize::MAX));
+        let zero_edit_shortest_lock: Arc<Mutex<usize>> = Arc::new(Mutex::new(usize::MAX));
+        let best_matches_lock: Arc<Mutex<Vec<&App>>> = Arc::new(Mutex::new(Vec::new()));
 
-        for app in &self.apps {
-            if app.name.to_lowercase() == searched_app_name.to_lowercase() {
+        self.apps.par_iter().any(|app| {
+            if app.name.to_lowercase() == searched_app_name {
                 match super::info::AppInfoRoot::get_app_info(app.appid, lang) {
-                    Ok(_) => return Ok(app.appid),
-                    Err(_) => continue,
+                    Ok(_) => {
+                        let mut best_matches = best_matches_lock.lock().unwrap();
+                        best_matches.clear();
+                        best_matches.push(app);
+                        return true;
+                    }
+                    Err(_) => return false,
                 }
             }
-            let edit = get_edit_distance(&app.name, searched_app_name);
+            let edit = get_edit_distance(&app.name, &searched_app_name);
+            let mut zero_edit_shortest = zero_edit_shortest_lock.lock().unwrap();
+            let mut best_match_value = best_match_value_lock.lock().unwrap();
+            let mut best_matches = best_matches_lock.lock().unwrap();
 
-            if edit == 0 && app.name.len() <= zero_edit_shortest {
-                match super::info::AppInfoRoot::get_app_info(app.appid, lang) {
-                    Ok(_) => (),
-                    Err(_) => continue,
+            if edit == 0 && app.name.len() < *zero_edit_shortest {
+                *zero_edit_shortest = app.name.len();
+                *best_match_value = edit;
+                best_matches.clear();
+                best_matches.push(app);
+            } else if edit == 0 && app.name.len() == *zero_edit_shortest {
+                *best_match_value = edit;
+                best_matches.push(app);
+            } else if edit < *best_match_value {
+                *best_match_value = edit;
+                best_matches.clear();
+                best_matches.push(app);
+            } else if edit == *best_match_value {
+                best_matches.push(app);
+            }
+            false
+        });
+        let best_matches = Arc::clone(&best_matches_lock);
+        for app in &*best_matches.lock().unwrap() {
+            match super::info::AppInfoRoot::get_app_info(app.appid, lang) {
+                Ok(_) => {
+                    return Ok(app.appid);
                 }
-                zero_edit_shortest = app.name.len();
-                best_ref = Some(app);
-                best_match_value = edit;
-            } else if edit < best_match_value {
-                match super::info::AppInfoRoot::get_app_info(app.appid, lang) {
-                    Ok(_) => (),
-                    Err(_) => continue,
-                }
-                best_ref = Some(app);
-                best_match_value = edit;
+                Err(_) => continue,
             }
         }
-
-        if let Some(app) = best_ref {
-            return Ok(app.appid);
-        } else {
-            return Err(ExitError("no matching app found"));
-        }
+        return Err(ExitError("no such app found"));
     }
 }
 
