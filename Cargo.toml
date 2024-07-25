@@ -8,6 +8,7 @@ overflow-checks = true
 debug = 1
 
 [dependencies]
+tokio = { version = "1.39.1", features = ["full"] }
 edit-distance = "2.1.2"
 image = "0.24"
 rayon = "1.10.0"

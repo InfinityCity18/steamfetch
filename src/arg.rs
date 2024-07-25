@@ -1,7 +1,6 @@
 use std::str::FromStr;
 
 use crate::{
-    app::print,
     error::{ExitError, ExitResult, IntoResultExitError},
     glyphs::{FancyFont, NoFancyFont},
 };
@@ -106,7 +105,7 @@ impl ArgParser {
     }
 
     #[allow(unreachable_code)]
-    pub fn run_command(&mut self) -> ExitResult<'static, ()> {
+    pub async fn run_command(&mut self) -> ExitResult<'static, ()> {
         self.process_options()?;
 
         let command = self
@@ -148,7 +147,8 @@ impl ArgParser {
                         self.offset,
                         &fg_mod,
                         bg_color,
-                    )?;
+                    )
+                    .await?;
                 } else {
                     crate::app::print::<FancyFont>(
                         &app_name,
@@ -158,7 +158,8 @@ impl ArgParser {
                         self.offset,
                         &fg_mod,
                         bg_color,
-                    )?;
+                    )
+                    .await?;
                 }
             }
         }

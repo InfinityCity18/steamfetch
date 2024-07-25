@@ -2,12 +2,10 @@ use json::App;
 
 use rayon::prelude::*;
 
-pub use json::AppsList;
+pub use json::Applist;
+use tokio::runtime::Handle;
 
-use crate::{
-    error::{ExitError, ExitResult, IntoResultExitError},
-    print,
-};
+use crate::error::{ExitError, ExitResult, IntoResultExitError};
 use serde_json::Value;
 use std::{
     cmp::Ordering,
@@ -16,17 +14,21 @@ use std::{
 
 mod json;
 
-impl AppsList {
-    pub fn get_applist() -> ExitResult<'static, AppsList> {
+impl Applist {
+    pub async fn get_applist() -> ExitResult<'static, Applist> {
         let url = super::links::APP_LIST;
-        let response = reqwest::blocking::get(url).into_exit_error("fetching applist failed")?;
+        let response = reqwest::get(url)
+            .await
+            .into_exit_error("fetching applist failed")?;
 
-        let mut list: Value = response.json().into_exit_error("parsing json failed")?;
-        serde_json::from_value(list["applist"]["apps"].take())
-            .into_exit_error("parsing json failed")
+        let mut list: Value = response
+            .json()
+            .await
+            .into_exit_error("parsing json failed")?;
+        serde_json::from_value(list["applist"].take()).into_exit_error("parsing json failed")
     }
 
-    pub fn get_most_matching_app_id(
+    pub async fn get_most_matching_app_id(
         &self,
         searched_app_name: &str,
         lang: &str,
@@ -35,9 +37,11 @@ impl AppsList {
         let zero_edit_shortest_lock: Arc<Mutex<usize>> = Arc::new(Mutex::new(usize::MAX));
         let best_matches_lock: Arc<Mutex<Vec<&App>>> = Arc::new(Mutex::new(Vec::new()));
 
+        let handle = Handle::current();
+
         self.apps.par_iter().any(|app| {
             if app.name.to_lowercase() == searched_app_name {
-                match super::info::AppInfoRoot::get_app_info(app.appid, lang) {
+                match handle.block_on(super::info::AppInfoRoot::get_app_info(app.appid, lang)) {
                     Ok(_) => {
                         let mut best_matches = best_matches_lock.lock().unwrap();
                         best_matches.clear();
@@ -71,7 +75,7 @@ impl AppsList {
         });
         let best_matches = Arc::clone(&best_matches_lock);
         for app in &*best_matches.lock().unwrap() {
-            match super::info::AppInfoRoot::get_app_info(app.appid, lang) {
+            match super::info::AppInfoRoot::get_app_info(app.appid, lang).await {
                 Ok(_) => {
                     return Ok(app.appid);
                 }

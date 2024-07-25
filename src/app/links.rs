@@ -3,4 +3,4 @@ pub const APP_INFO: &'static str =
     "https://store.steampowered.com/api/appdetails/?appids={1}&l={2}";
 pub const APP_PLAYERS: &'static str =
     "https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid={}";
-pub const APP_LIST: &'static str = "https://api.steampowered.com/ISteamApps/GetAppList/v1";
+pub const APP_LIST: &'static str = "https://api.steampowered.com/ISteamApps/GetAppList/v2";

@@ -4,9 +4,13 @@ mod list;
 mod print;
 mod reviews;
 
-use crate::{error::ExitResult, glyphs::Glyph, print::Module};
+use crate::{
+    error::{ExitResult, IntoResultExitError},
+    glyphs::Glyph,
+    print::Module,
+};
 
-pub fn print<T: Glyph>(
+pub async fn print<T: Glyph>(
     app_name: &str,
     lang: &str,
     width: u16,
@@ -18,21 +22,26 @@ pub fn print<T: Glyph>(
     use std::time::Instant;
     let now = Instant::now();
 
-    let app_list = list::AppsList::get_applist()?;
+    let app_list = list::Applist::get_applist().await?;
     let elapsed = now.elapsed();
     println!("Elapsed: {:.2?}", elapsed);
-    let app_id = app_list.get_most_matching_app_id(app_name, lang)?;
+    let app_id = app_list.get_most_matching_app_id(app_name, lang).await?;
     let elapsed = now.elapsed();
     println!("Elapsed: {:.2?}", elapsed);
-    let app = info::AppInfoRoot::get_app_info(app_id, lang)?;
+    let lang_mv = lang.to_string();
+    let app = tokio::spawn(async move {
+        let lang_mv = lang_mv;
+        info::AppInfoRoot::get_app_info(app_id, &lang_mv).await
+    });
+    let review = tokio::spawn(reviews::QuerySummary::get_app_reviews(app_id));
+    let player_count = tokio::spawn(info::AppInfoRoot::get_player_count(app_id));
+    let app = app.await.into_exit_error("fail")??;
+    let review = review.await.into_exit_error("fail")??;
+    let player_count = player_count.await.into_exit_error("fail")??;
+
     let elapsed = now.elapsed();
     println!("Elapsed: {:.2?}", elapsed);
-    let review = reviews::QuerySummary::get_app_reviews(app_id)?;
-    let elapsed = now.elapsed();
-    println!("Elapsed: {:.2?}", elapsed);
-    let player_count = info::AppInfoRoot::get_player_count(app_id)?;
-    let elapsed = now.elapsed();
-    println!("Elapsed: {:.2?}", elapsed);
+
     let frame = Module::frame::<T>(
         &app.data.name,
         width,
