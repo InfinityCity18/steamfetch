@@ -13,6 +13,7 @@ impl<'a> Module<'a> {
         fg_mod: &'a str,
         bg_color: &'a str,
         whitespace_offset: u16,
+        name_too_long: bool,
     ) -> Self {
         let mut lines: Vec<Line> = Vec::new();
         let left_top = Character::create(T::LEFT_TOP_CORNER, fg_mod, bg_color);
@@ -38,14 +39,24 @@ impl<'a> Module<'a> {
             whitespace_offset,
             steamfetch,
         );
-        let appname_line = Line::border_and_filling_with_centered_text(
-            width,
-            left_bot,
-            right_bot,
-            bar,
-            whitespace_offset,
-            appname,
-        );
+        let appname_line: Line = if name_too_long {
+            Line::border_and_filling_with_long_text(
+                left_bot,
+                right_bot,
+                bar,
+                whitespace_offset,
+                appname,
+            )
+        } else {
+            Line::border_and_filling_with_centered_text(
+                width,
+                left_bot,
+                right_bot,
+                bar,
+                whitespace_offset,
+                appname,
+            )
+        };
 
         lines.push(whitespace_line);
         lines.push(steamfetch_line);
@@ -77,11 +88,7 @@ impl<'a> Module<'a> {
         if app.data.price_overview.is_some() {
             let mut price = Character::create_vec_from_str("Price", fg_mod, bg_color);
             price.append(&mut Character::create_vec_from_str(": ", NONE, NONE));
-            if app.data.is_free {
-                price.push(Character::create(T::LEFT_HALF_CIRCLE, BLUE_BG, NONE));
-                price.append(&mut Character::create_vec_from_str("Free", NONE, BLUE_BG));
-                price.push(Character::create(T::RIGHT_HALF_CIRCLE, BLUE_BG, NONE));
-            } else if app.data.price_overview.as_ref().unwrap().discount_percent == 0 {
+            if app.data.price_overview.as_ref().unwrap().discount_percent == 0 {
                 price.append(&mut Character::create_vec_from_str(
                     &app.data.price_overview.as_ref().unwrap().final_formatted,
                     NONE,
@@ -111,7 +118,24 @@ impl<'a> Module<'a> {
             )
             .into_iter()
             .for_each(|l| lines.push(l));
+        } else if app.data.is_free {
+            let mut price = Character::create_vec_from_str("Price", fg_mod, bg_color);
+            price.append(&mut Character::create_vec_from_str(": ", NONE, NONE));
+            price.push(Character::create(T::LEFT_HALF_CIRCLE, BLUE_FG, NONE));
+            price.append(&mut Character::create_vec_from_str("Free", NONE, BLUE_BG));
+            price.push(Character::create(T::RIGHT_HALF_CIRCLE, BLUE_FG, NONE));
+            Line::border_filling_wrapping_text(
+                width,
+                pipe,
+                pipe,
+                whitespace,
+                whitespace_offset,
+                price,
+            )
+            .into_iter()
+            .for_each(|l| lines.push(l));
         }
+
         let mut id = Character::create_vec_from_str("ID", fg_mod, bg_color);
         id.append(&mut Character::create_vec_from_str(
             format!(": {}", app.data.steam_appid).as_ref(),

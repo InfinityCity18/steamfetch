@@ -1,17 +1,20 @@
 use crate::error::{ExitResult, IntoResultExitError};
 
-pub fn print_image(
+pub async fn print_image(
     url: &str,
     width: u16,
     height: u16,
     x_offset: u16,
     y_offset: i16,
 ) -> ExitResult<'static, ()> {
-    let response = reqwest::blocking::get(url).into_exit_error("failed to fetch image")?;
+    let response = reqwest::get(url)
+        .await
+        .into_exit_error("failed to fetch image")?;
 
     let image = image::load_from_memory(
         &response
             .bytes()
+            .await
             .into_exit_error("failed to get image bytes")?,
     )
     .into_exit_error("failed to load image into memory")?;

@@ -14,14 +14,14 @@ impl<'a> Module<'a> {
         Ok(())
     }
 
-    pub fn print_image(
+    pub async fn print_image(
         url: &str,
         width: u16,
         height: u16,
         x_offset: u16,
         y_offset: i16,
     ) -> ExitResult<'static, ()> {
-        super::image::print_image(url, width, height, x_offset, y_offset)?;
+        super::image::print_image(url, width, height, x_offset, y_offset).await?;
         Ok(())
     }
 }

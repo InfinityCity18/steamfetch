@@ -74,7 +74,10 @@ impl Applist {
             false
         });
         let best_matches = Arc::clone(&best_matches_lock);
-        for app in &*best_matches.lock().unwrap() {
+        let mut best_matches = best_matches.lock().unwrap();
+        best_matches.sort_by(|a: &&App, b: &&App| a.name.len().cmp(&b.name.len()));
+
+        for app in &*best_matches {
             match super::info::AppInfoRoot::get_app_info(app.appid, lang).await {
                 Ok(_) => {
                     return Ok(app.appid);
