@@ -103,7 +103,10 @@ impl ArgParser {
         self.process_options()?;
 
         let mut iter = self.commands.iter();
-        let first_arg = iter.next().to_owned().unwrap();
+        let first_arg = iter
+            .next()
+            .to_owned()
+            .into_exit_error("no arguments provided")?;
         let mut app_name = String::from_str(first_arg).unwrap();
 
         while let Some(comm) = iter.next() {
