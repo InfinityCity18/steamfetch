@@ -97,23 +97,20 @@ fn get_edit_distance(app_name: &str, searched_app_name: &str) -> usize {
         .partial_cmp(&searched_app_name.len())
         .expect("lengths should be comparable")
     {
-        Ordering::Less => edit_distance(
-            app_name.to_lowercase().as_ref(),
-            searched_app_name.to_lowercase().as_ref(),
-        ),
-        Ordering::Equal => edit_distance(
-            app_name.to_lowercase().as_ref(),
-            searched_app_name.to_lowercase().as_ref(),
-        ),
+        Ordering::Less => {
+            edit_distance(&app_name.to_lowercase(), &searched_app_name.to_lowercase())
+        }
+        Ordering::Equal => {
+            edit_distance(&app_name.to_lowercase(), &searched_app_name.to_lowercase())
+        }
         Ordering::Greater => edit_distance(
-            app_name[..app_name
+            &app_name[..app_name
                 .char_indices()
                 .map(|(i, _)| i)
                 .nth(searched_app_name.len())
                 .unwrap_or(app_name.len())]
-                .to_lowercase()
-                .as_ref(),
-            searched_app_name.to_lowercase().as_ref(),
+                .to_lowercase(),
+            &searched_app_name.to_lowercase(),
         ),
     }
 }
